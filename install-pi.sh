@@ -3,8 +3,9 @@
 set -e
 
 INSTALL_PATH=/opt/firestation
-WHEEL_FILE=/tmp/firestation_gateway-0.1.0-py3-none-any.whl
+WHEEL_FILE=firestation_gateway-0.1.0-py3-none-any.whl
 SYSTEMD_USER="www-data"
+WEB_USER="www-data"
 CFG_FILE=0
 
 PACKAGE_NAME="firestation-gateway"
@@ -13,7 +14,7 @@ SCRIPT_NAME="firestation-gw"
 SERVICE_NAME="$PACKAGE_NAME.service"
 SERVICE_PATH=/etc/systemd/system/$SERVICE_NAME
 
-WEB_SITE_CONFIG_PATH=/etc/apache2/sites-available/gw.$(hostname).local.conf
+WEB_SITE_CONFIG_PATH=/etc/apache2/sites-available/$(hostname).local.conf
 
 
 setup_systemd_service() {
@@ -45,7 +46,14 @@ EOF'
 }
 
 setup_web_service() {
-  echo "web"
+  echo "[INFO] Download and install webfrontend..."
+  curl -s -L https://github.com/firestation-gateway/webfrontend/archive/refs/heads/main.tar.gz | tar -xvzf - --strip-components 1 --one-top-level=webfrontend
+  # remove meta data from repository 
+  mv webfrontend/www web
+  rm -rf webfrontend
+  rm -f web/config.yaml
+  chown -R www-data:www-data web
+
   # check webserver dependency
   command -v apache2 > /dev/null || apt-get install -y apache2
   
@@ -60,7 +68,7 @@ setup_web_service() {
   sh -c 'cat <<EOF > '$WEB_SITE_CONFIG_PATH'
 Listen 8080
 <VirtualHost *:8080>
-    ServerName gw.'$(hostname)'.local
+    ServerName '$(hostname)'.local
     DocumentRoot "'$INSTALL_PATH'/web"
     <Directory '$INSTALL_PATH'/web>
         AllowOverride None
@@ -85,13 +93,14 @@ EOF'
 }
 
 setup_fsg() {
+  echo "[INFO] Download and install firestation-gateway..."
+
+  # download firestation-gateway
+  curl -s -L https://github.com/firestation-gateway/firestation-gateway/releases/download/v0.1.0/$WHEEL_FILE -o /tmp/$WHEEL_FILE
 
   mkdir -p $INSTALL_PATH
 
   chown -R $SYSTEMD_USER $INSTALL_PATH
-
-  # run next commands as $SYSTEMD_USER user
-  sudo -su $SYSTEMD_USER
 
   cd $INSTALL_PATH
 
@@ -99,7 +108,7 @@ setup_fsg() {
   . "$INSTALL_PATH/venv/bin/activate"
   pip install --upgrade pip
 
-  pip install "$WHEEL_FILE"
+  pip install /tmp/$WHEEL_FILE
 
   if [[ $CFG_FILE -ne 0 ]]; then
       echo "[INFO] Installiere Konfigurationsdatei $CFG_FILE"
@@ -108,14 +117,12 @@ setup_fsg() {
       echo "[INFO] Generiere Beispielkonfiguration"
       firestation-gw --generate-config > $INSTALL_PATH/config.yaml
   fi
-  # exit $SYSTEMD_USER
-  exit 0
 
-  sudo chown $SYSTEMD_USER:www-data $INSTALL_PATH/config.yaml
-  # sudo chown -R $SYSTEMD_USER $INSTALL_PATH
+  chown -R $SYSTEMD_USER $INSTALL_PATH
+  chown $SYSTEMD_USER:www-data $INSTALL_PATH/config.yaml
   
   # user need access to gpio
-  sudo usermod -aG gpio $SYSTEMD_USER
+  usermod -aG gpio $SYSTEMD_USER
 }
 
 main() {
@@ -145,5 +152,10 @@ main() {
   setup_web_service
 
 }
+
+if [ $(id -u) -ne 0 ]; then
+  echo Please run this script as root or using sudo!
+  exit 1
+fi
 
 main "$@"
