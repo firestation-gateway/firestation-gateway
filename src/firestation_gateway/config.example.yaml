@@ -1,0 +1,48 @@
+producers:
+  - name: Genius
+    type: genius
+    params:
+      line: -1
+    events:
+      genius_alarm:
+      genius_selftest:
+      genius_idle:
+
+consumers:
+  - name: Tetracontrol
+    type: tetracontrol
+    params:
+      testmode: true
+      token: "XYZ"
+      url: "http://"
+    events:
+      genius_alarm:
+        type: callout
+        dest: 0000000
+        text: "F-RWM Fwh Musterstadt*Hauptstr. 112"
+      genius_selftest:
+        type: callout
+        dest: 0000000
+        text: "Funktionsüberprüfung RWM Fwh Musterstadt"
+      genius_idle:
+        type: normal
+        dest: 0000000
+        text: "Ruhe RWM Fwh Musterstadt"
+
+  - name: Connect
+    type: connect
+    params:
+      token: "ABC"
+      testmode: true
+      url: "https://connectapi.feuersoftware.com"
+    events:
+      genius_alarm:
+        ric: "0000000"
+        keyword: "F-RWM"
+        facts: "Meldereingang"
+        source: "Pi Fwh Musterstadt"
+        address:
+          street: "Hauptstr."
+          housenumber: "112"
+          zipcode: "112112"
+          city: "Musterstadt"
