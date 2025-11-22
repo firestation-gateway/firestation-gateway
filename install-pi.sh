@@ -120,7 +120,7 @@ setup_fsg() {
 
   chown -R $SYSTEMD_USER $INSTALL_PATH
   chown $SYSTEMD_USER:www-data $INSTALL_PATH/config.yaml
-  
+  chmod 0660 $INSTALL_PATH/config.yaml
   # user need access to gpio
   usermod -aG gpio $SYSTEMD_USER
 }
