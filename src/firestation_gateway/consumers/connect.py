@@ -51,6 +51,8 @@ class Connect(BaseConsumerQueued):
 
         evt_cfg = self.events_config.get(event_name)
         if evt_cfg is not None:
+            if evt_cfg.get("enabled", True) is False:
+                return
             # event is set within config
 
             op = operation.copy()

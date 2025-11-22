@@ -58,6 +58,8 @@ class Tetracontrol(BaseConsumerQueued):
             # LOG.exception(e)
         except requests.exceptions.HTTPError as e:
             LOGGER.error(e)
+        except requests.exceptions.InvalidURL as e:
+            LOGGER.error(e)
 
     def handle_event(self, event_name: str, data: Any):
         message = f"Event='{event_name}', data='{data}'"
@@ -65,6 +67,8 @@ class Tetracontrol(BaseConsumerQueued):
 
         evt_cfg = self.events_config.get(event_name)
         if evt_cfg is not None:
+            if evt_cfg.get("enabled", True) is False:
+                return
             # event is set within config
             if evt_cfg.get("type") == "callout":
                 sds = sds_callout_prototype.copy()
