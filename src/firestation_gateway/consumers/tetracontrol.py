@@ -49,17 +49,18 @@ class Tetracontrol(BaseConsumerQueued):
         # counter for all alarm events
         self.alarm_number = 1
 
-        # test connection to tetracontrol. TODO: remove later
-        try:
-            r = self.tetracontrol.device_status()
-            print(r.text)
-        except requests.exceptions.ConnectionError as e:
-            LOGGER.error(e)
-            # LOG.exception(e)
-        except requests.exceptions.HTTPError as e:
-            LOGGER.error(e)
-        except requests.exceptions.InvalidURL as e:
-            LOGGER.error(e)
+        if not self.testmode:
+            # test connection to tetracontrol. TODO: remove later
+            try:
+                r = self.tetracontrol.device_status()
+                print(r.text)
+            except requests.exceptions.ConnectionError as e:
+                LOGGER.error(e)
+                # LOG.exception(e)
+            except requests.exceptions.HTTPError as e:
+                LOGGER.error(e)
+            except requests.exceptions.InvalidURL as e:
+                LOGGER.error(e)
 
     def handle_event(self, event_name: str, data: Any):
         message = f"Event='{event_name}', data='{data}'"

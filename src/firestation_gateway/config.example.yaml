@@ -4,10 +4,33 @@ producers:
     params:
       line: -1
     events:
-      genius_alarm:
-      genius_selftest:
-      genius_idle:
+      idle: ~
+      selftest: ~
+      alarm: ~
 
+  - name: Input1
+    type: generic-input
+    params:
+      # GPIO line number. (The value -1 simulates input via a file in the file system.)
+      line: -1
+      # GPIO line bias, can be "default", "pull_up", "pull_down", or "disable".
+      bias: "default"
+      # GPIO is active low (default: true)
+      actic_low: true
+      # GPIO debounce time (default: 500; unit ms)
+      time_debounce: 500
+      # Send alarm event when the input is active for longer than this time 
+      time_alarm: 5000
+
+    events:
+    # This module sends the "alarm" event when the input is active for longer 
+    # than the time value and "idle" event when the input becomes inactive afterwards.
+      alarm: ~
+      idle: ~
+
+# Event names consist of the producer name and the producer's event.
+# Example: producer 'generic-input' name: "Input_BMA"
+#           event => input_bma_alarm
 consumers:
   - name: Tetracontrol
     type: tetracontrol
@@ -17,14 +40,17 @@ consumers:
       url: "http://"
     events:
       genius_alarm:
+        enabled: true
         type: callout
         dest: 0000000
         text: "F-RWM Fwh Musterstadt*Hauptstr. 112"
       genius_selftest:
+        enabled: true
         type: callout
         dest: 0000000
         text: "Funktionsüberprüfung RWM Fwh Musterstadt"
       genius_idle:
+        enabled: true
         type: normal
         dest: 0000000
         text: "Ruhe RWM Fwh Musterstadt"
@@ -37,6 +63,7 @@ consumers:
       url: "https://connectapi.feuersoftware.com"
     events:
       genius_alarm:
+        enabled: true
         ric: "0000000"
         keyword: "F-RWM"
         facts: "Meldereingang"
@@ -46,3 +73,12 @@ consumers:
           housenumber: "112"
           zipcode: "112112"
           city: "Musterstadt"
+
+  - name: Ausgabe
+    type: generic-output
+    params: []
+    events:
+      input1_alarm:
+        enabled: true
+      input1_idle:
+        enabled: false
