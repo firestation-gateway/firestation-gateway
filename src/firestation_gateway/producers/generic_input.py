@@ -49,7 +49,7 @@ class GenericInput(threading.Thread):
             self.time_debounce = 500
 
         try:
-            self.time_alarm = int(config.get("time_alarm", "NICH VORHANDEN"))
+            self.time_alarm = int(config.get("time_alarm", "NICHT VORHANDEN"))
         except ValueError as e:
             raise ValueError("alarm_time: Invalid value.") from e
 

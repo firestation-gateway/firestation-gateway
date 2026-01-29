@@ -16,7 +16,7 @@ producers:
       # GPIO line bias, can be "default", "pull_up", "pull_down", or "disable".
       bias: "default"
       # GPIO is active low (default: true)
-      actic_low: true
+      active_low: true
       # GPIO debounce time (default: 500; unit ms)
       time_debounce: 500
       # Send alarm event when the input is active for longer than this time 
