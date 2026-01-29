@@ -59,8 +59,9 @@ class GenericInput(threading.Thread):
             raise ValueError("line: Invalid value.") from e
 
         if line >= 0:
+            chip_path = config.get("path", "/dev/gpiochip0")
             self.pin_in = GPIO(
-                "/dev/gpiochip0", line, "in", inverted=active_low, bias=bias
+                chip_path, line, "in", inverted=active_low, bias=bias
             )
         else:
             self.pin_in = None
@@ -73,8 +74,13 @@ class GenericInput(threading.Thread):
         self._state = GenericInputState.IDLE
         self._btn_counter = 0
         self._sampling_interval = TIMER_PERIOD
-        logging.info("%s: line=%s", name, line)
-        logging.debug(self.pin_in)
+        LOGGER.info(
+            "%s: Input %s line %s, value %s",
+            name,
+            chip_path,
+            line,
+            self._read_input(),
+        )
 
     def _read_input(self):
         if self.pin_in is not None:

@@ -1,0 +1,145 @@
+producers:
+  - name: Eingang1
+    type: generic-input
+    params:
+      # GPIO line number. (The value -1 simulates input via a file in the file system.)
+      line: 27
+      # GPIO line bias, can be "default", "pull_up", "pull_down", or "disable".
+      bias: "default"
+      # GPIO is active low (default: true)
+      active_low: true
+      # GPIO debounce time (default: 500; unit ms)
+      time_debounce: 500
+      # Send alarm event when the input is active for longer than this time 
+      time_alarm: 2000
+
+    events:
+    # This module sends the "alarm" event when the input is active for longer 
+    # than the time value and "idle" event when the input becomes inactive afterwards.
+      alarm: ~
+      idle: ~
+
+  - name: Eingang2
+    type: generic-input
+    params:
+      line: 23
+      bias: "default"
+      active_low: true
+      time_debounce: 500
+      time_alarm: 2000
+    events:
+      alarm: ~
+      idle: ~
+
+  - name: Eingang3
+    type: generic-input
+    params:
+      line: 25
+      bias: "default"
+      active_low: true
+      time_debounce: 500
+      time_alarm: 2000
+    events:
+      alarm: ~
+      idle: ~
+
+  - name: Eingang4
+    type: generic-input
+    params:
+      line: 6
+      bias: "default"
+      active_low: true
+      time_debounce: 500
+      time_alarm: 2000
+    events:
+      alarm: ~
+      idle: ~
+
+  - name: Eingang5
+    type: generic-input
+    params:
+      line: 17
+      bias: "default"
+      active_low: true
+      time_debounce: 500
+      time_alarm: 2000
+    events:
+      alarm: ~
+      idle: ~
+
+  - name: Eingang6
+    type: generic-input
+    params:
+      line: 22
+      bias: "default"
+      active_low: true
+      time_debounce: 500
+      time_alarm: 2000
+    events:
+      alarm: ~
+      idle: ~
+
+  - name: Eingang7
+    type: generic-input
+    params:
+      line: 24
+      bias: "default"
+      active_low: true
+      time_debounce: 500
+      time_alarm: 2000
+    events:
+      alarm: ~
+      idle: ~
+
+  - name: Eingang8
+    type: generic-input
+    params:
+      line: 5
+      bias: "default"
+      active_low: true
+      time_debounce: 500
+      time_alarm: 2000
+    events:
+      alarm: ~
+      idle: ~
+
+# Event names consist of the producer name and the producer's event.
+# Example: producer 'generic-input' name: "Input_BMA"
+#           event => input_bma_alarm
+consumers:
+  - name: Ausgang1
+    type: generic-output
+    params:
+      line: 19
+      # default output value after start (values: 0, false OR 1, true)
+      default_value: 0
+    events:
+      Eingang1_alarm:
+        enabled: true
+        value: 1
+      Eingang1_idle:
+        enabled: true
+        value: 0
+
+  - name: Ausgang2
+    type: generic-output
+    params:
+      line: 20
+      # default output value after start (values: 0, false OR 1, true)
+      default_value: 0
+    events:
+      Eingang1_alarm:
+        enabled: true
+        value: 1
+      Eingang1_idle:
+        enabled: true
+        value: 0
+
+  - name: Log Ausgabe
+    type: generic-printout
+    params:
+    events:
+      Eingang1_alarm:
+        enabled: true
+      Eingang1_idle:
+        enabled: true
