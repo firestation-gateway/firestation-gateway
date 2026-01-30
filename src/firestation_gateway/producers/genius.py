@@ -71,7 +71,7 @@ class Genius(threading.Thread):
             LOGGER.debug("EVT: Selftest")
 
             self.emitter.emit(
-                self.name.lower() + "_selftest",
+                self.name + "_selftest",
                 {"time": time.asctime(), "source": self.name},
             )
 
@@ -80,7 +80,7 @@ class Genius(threading.Thread):
             LOGGER.info("STATE: Idle")
             LOGGER.debug("EVT: Idle")
             self.emitter.emit(
-                self.name.lower() + "_idle", {"time": time.asctime(), "source": self.name}
+                self.name + "_idle", {"time": time.asctime(), "source": self.name}
             )
         elif (
             pending == GeniusState.ACTIVE and self._state != GeniusState.ACTIVE
@@ -92,7 +92,7 @@ class Genius(threading.Thread):
             LOGGER.info("STATE: Alarm")
             # sending event on state alarm
             self.emitter.emit(
-                self.name.lower() + "_alarm", {"time": time.asctime(), "source": self.name}
+                self.name + "_alarm", {"time": time.asctime(), "source": self.name}
             )
 
         if self._state != pending:

@@ -57,7 +57,8 @@ class GenericInput(threading.Thread):
             line = int(config.get("line", -1))
         except ValueError as e:
             raise ValueError("line: Invalid value.") from e
-
+        
+        chip_path = "SIMULATE"
         if line >= 0:
             chip_path = config.get("path", "/dev/gpiochip0")
             self.pin_in = GPIO(
@@ -110,7 +111,7 @@ class GenericInput(threading.Thread):
         ):
             LOGGER.info("STATE: Active -> Alarm")
             self.emitter.emit(
-                self.name.lower() + "_alarm",
+                self.name + "_alarm",
                 {"time": time.asctime(), "source": self.name},
             )
         if (
@@ -119,7 +120,7 @@ class GenericInput(threading.Thread):
         ):
             LOGGER.info("STATE: -> Idle")
             self.emitter.emit(
-                self.name.lower() + "_idle",
+                self.name + "_idle",
                 {"time": time.asctime(), "source": self.name},
             )
 
