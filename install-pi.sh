@@ -45,13 +45,10 @@ EOF'
   echo "[INFO] systemd Dienst aktiviert: $SERVICE_NAME"
 }
 
+
 setup_web_service() {
   echo "[INFO] Download and install webfrontend..."
-  curl -s -L https://github.com/firestation-gateway/webfrontend/archive/refs/heads/main.tar.gz | tar -xvzf - --strip-components 1 --one-top-level=webfrontend
-  # remove meta data from repository 
-  mv webfrontend/www web
-  rm -rf webfrontend
-  rm -f web/config.yaml
+  curl -s -L https://github.com/firestation-gateway/firestation-web/archive/refs/heads/main.tar.gz | tar -xvzf - --strip-components 1 --one-top-level=web
   chown -R www-data:www-data web
 
   # check webserver dependency
@@ -64,6 +61,14 @@ setup_web_service() {
   command -v libapache2-mod-php > /dev/null || apt-get install -y libapache2-mod-php
   service apache2 restart
 
+  a2enmod rewrite
+  # enable SSL
+  a2enmod ssl
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+      -keyout /etc/ssl/private/apache-self-signed.key \
+      -out /etc/ssl/certs/apache-self-signed.crt \
+      -subj "/C=DE/ST=Firestation-Gateway/CN="$(hostname)".local"
+
   # copy site config
   sh -c 'cat <<EOF > '$WEB_SITE_CONFIG_PATH'
 Listen 8080
@@ -74,6 +79,9 @@ Listen 8080
         AllowOverride None
         Require all granted
     </Directory>
+    SSLEngine on
+    SSLCertificateFile      /etc/ssl/certs/apache-self-signed.crt
+    SSLCertificateKeyFile   /etc/ssl/private/apache-self-signed.key
 
 </VirtualHost>
 EOF'

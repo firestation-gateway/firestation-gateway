@@ -1,4 +1,29 @@
+
+# RPI-IO-Board
+#
+#   Name | Line 
+#    E1  |  27
+#    E2  |  23
+#    E3  |  25
+#    E4  |   6
+#    E5  |  17
+#    E6  |  22
+#    E7  |  24
+#    E8  |   5
+#    A1  |  19
+#    A2  |  20
+#
+
 producers:
+  - name: Genius
+    type: genius
+    params:
+      line: -1
+    events:
+      idle: ~
+      selftest: ~
+      alarm: ~
+
   - name: Eingang1
     type: generic-input
     params:
@@ -105,13 +130,15 @@ producers:
 
 # Event names consist of the producer name and the producer's event.
 # Example: producer 'generic-input' name: "Input_BMA"
-#           event => input_bma_alarm
+#           event => Input_BMA_alarm
+# 
 consumers:
   - name: Ausgang1
+    # This consumer-type sets an output when an event occurs.
     type: generic-output
     params:
       line: 19
-      # default output value after start (values: 0, false OR 1, true)
+      # default output value after start (off: 0 / on: 1)
       default_value: 0
     events:
       Eingang1_alarm:
@@ -125,7 +152,7 @@ consumers:
     type: generic-output
     params:
       line: 20
-      # default output value after start (values: 0, false OR 1, true)
+      # default output value after start (off: 0 / on: 1)
       default_value: 0
     events:
       Eingang1_alarm:
@@ -136,6 +163,7 @@ consumers:
         value: 0
 
   - name: Log Ausgabe
+    # This consumer-type only prints event.
     type: generic-printout
     params:
     events:
@@ -143,3 +171,50 @@ consumers:
         enabled: true
       Eingang1_idle:
         enabled: true
+
+  - name: Tetracontrol
+    # The tetracontrol type send an callout or normal message over Tetracontrol.
+    type: tetracontrol
+    params:
+      # When test mode is active, no alarm is sent. Ideal for testing. 
+      testmode: true
+      # Token for tetracontrol server
+      token: "XYZ"
+      # tetracontrol server url. e.g. http://192.168.0.123:8080
+      # Warning: https:// connetion isn't tested. Please use this with care.
+      url: "http://"
+    events:
+      Eingang1_alarm:
+        enabled: true
+        # type: callout or normal
+        type: callout
+        # dest: issi
+        dest: 0000000
+        # text: free text (hint: write "&123" in front for sub addresses)
+        # e.g.: text: "&63F-RWM Fwh Treis*Weiherstr. 6"
+        text: "F-RWM Fwh Musterstadt*Hauptstr. 112"
+      Eingang1_idle:
+        enabled: true
+        type: normal
+        dest: 0000000
+        text: "Ruhe RWM Fwh Musterstadt"
+
+  - name: Connect
+    # The connect type send an opperation to the connect interface.
+    type: connect
+    params:
+      token: "ABC"
+      testmode: true
+      url: "https://connectapi.feuersoftware.com"
+    events:
+      Eingang1_alarm:
+        enabled: true
+        ric: "0000000"
+        keyword: "F-RWM"
+        facts: "Meldereingang"
+        source: "Pi Fwh Musterstadt"
+        address:
+          street: "Hauptstr."
+          housenumber: "112"
+          zipcode: "112112"
+          city: "Musterstadt"
