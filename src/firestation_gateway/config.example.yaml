@@ -1,0 +1,82 @@
+producers:
+  - name: Input1
+    type: generic-input
+    params:
+      # GPIO line number. (The value -1 simulates input via a file in the file system.)
+      # If file name "/tmp/firestation_gw_" + name.lower() + "_active" exists => active
+      # Example:
+      #   Create file: 'touch /tmp/firestation_gw_input1_active'
+      #   Remove file: 'rm /tmp/firestation_gw_input1_active'
+      #
+      line: -1
+      # GPIO line bias, can be "default", "pull_up", "pull_down", or "disable".
+      bias: "default"
+      # GPIO is active low (default: true)
+      active_low: true
+      # GPIO debounce time (default: 500; unit ms)
+      time_debounce: 500
+      # Send alarm event when the input is active for longer than this time 
+      time_alarm: 5000
+
+    events:
+      # This module sends the "alarm" event when the input is active for longer 
+      # than the 'time_alarm' value and "idle" event when the input becomes inactive afterwards.
+      alarm: ~
+      idle: ~
+
+  - name: RWM
+    type: genius
+    # This type is like the type Input with additional detection of the
+    # self-test. If this is not required, the type generic-input can also be used.
+    params:
+      line: -1
+    events:
+      idle: ~
+      selftest: ~
+      alarm: ~
+
+# Event names consist of the producer name and the producer's event.
+# Example: producer type 'generic-input', name: "Input_BMA"
+#           event => Input_BMA_alarm
+consumers:
+  - name: Tetracontrol
+    type: tetracontrol
+    params:
+      testmode: true
+      token: "XYZ"
+      url: "http://"
+    events:
+      RWM_alarm:
+        enabled: true
+        type: callout
+        dest: 0000000
+        text: "F-RWM Fwh Musterstadt*Hauptstr. 112"
+      RWM_selftest:
+        enabled: true
+        type: callout
+        dest: 0000000
+        text: "Funktionsüberprüfung RWM Fwh Musterstadt"
+      RWM_idle:
+        enabled: true
+        type: normal
+        dest: 0000000
+        text: "Ruhe RWM Fwh Musterstadt"
+
+  - name: Connect
+    type: connect
+    params:
+      token: "ABC"
+      testmode: true
+      url: "https://connectapi.feuersoftware.com"
+    events:
+      RWM_alarm:
+        enabled: true
+        ric: "0000000"
+        keyword: "F-RWM"
+        facts: "Meldereingang"
+        source: "Pi Fwh Musterstadt"
+        address:
+          street: "Hauptstr."
+          housenumber: "112"
+          zipcode: "112112"
+          city: "Musterstadt"
