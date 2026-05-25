@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+  - Consumer(connect): Add "properties" to send_operation. 
 
 ## [1.0.0] - 2026-03-12
 

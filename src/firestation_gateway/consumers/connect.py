@@ -70,6 +70,8 @@ class Connect(BaseConsumerQueued):
                     "zipcode", ""
                 )
                 op["Address"]["City"] = evt_cfg["address"].get("city", "")
+            if evt_cfg.get("properties", False):
+                op["Properties"] = evt_cfg["properties"]
 
             LOGGER.info(op)
             if not self.testmode:
